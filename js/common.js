@@ -1,0 +1,1 @@
+!function(i){i(".navbar ul.nav li").on("click",function(a){i(this).siblings(".active").removeClass("active"),i(this).addClass("active")})}(jQuery);
