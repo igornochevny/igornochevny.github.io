@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="PHP" type="php">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../../modules/php/PHP-7.0-x64" />
+          <root url="file://$APPLICATION_HOME_DIR$/bin" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../modules/php/PHP-7.0-x64" />
+          <root url="file://$APPLICATION_HOME_DIR$/bin" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="PHARS">
+        <CLASSES>
+          <root url="phar://$MODULE_DIR$/../../modules/php/PHP-7.0-x64/pharcommand.phar/" />
+          <root url="phar://$MODULE_DIR$/../../modules/php/PHP-7.0-x64/PEAR/go-pear.phar/" />
+          <root url="phar://$MODULE_DIR$/../../modules/php/PHP-7.0-x64/composer.phar/" />
+        </CLASSES>
+        <SOURCES>
+          <root url="phar://$MODULE_DIR$/../../modules/php/PHP-7.0-x64/pharcommand.phar/" />
+          <root url="phar://$MODULE_DIR$/../../modules/php/PHP-7.0-x64/PEAR/go-pear.phar/" />
+          <root url="phar://$MODULE_DIR$/../../modules/php/PHP-7.0-x64/composer.phar/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+  </component>
+</module>
