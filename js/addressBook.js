@@ -5,6 +5,7 @@
 "use strict";
 
 let addressBook = function (_options) {
+    debugger;
 
         let entryTemplate =
             '   <div class="col-md-4 phone">' +
@@ -165,7 +166,8 @@ let addressBook = function (_options) {
             entryDetailButton: function (ev) {
                 ev.preventDefault();
                 let idx = this.offsetParent.parentNode.dataset.index;
-                let item = utilityFunctions.getBooksItemByIdx(Book, idx);
+                //let item = utilityFunctions.getBooksItemByIdx(Book, idx);
+                let item = Book[idx];
                 Object.keys(item).forEach(function (key) {
                     infoForm.querySelector('[name=' + key + ']') && (infoForm.querySelector('[name=' + key + ']').value = item[key]);
                 });
