@@ -28,12 +28,27 @@ let addressBook = function (_options) {
             '        </div>' +
             '   </div>';
 
+        let phoneFieldTemplate =
+            '       <label for="phone">Another Phone</label>' +
+            '       <div class="input-group">' +
+            '           <input type="tel" autofocus class="form-control" name="phone2" id="phone2" pattern="[0-9]{8,12}" placeholder="9999999999" value="" required>' +
+            '           <span class="input-group-btn">' +
+            '               <button class="btn btn-secondary minus-button" type="button"><i class="fa fa-minus" aria-hidden="true"></i></button>' +
+            '           </span>' +
+            '       </div>';
+
+        let infoPhoneFieldTemplate =
+            '   <label for="phone">Another Phone</label>' +
+            '   <input type="tel" class="form-control" name="phone2" value="" readonly="readonly">';
+
+
+
         let options;
 
         let Book;
 
-        let doc = document, addEntryBtn, formCancelBtn, inputForm, inputFormContainer, entriesContainer, infoForm,
-            infoFormContainer, infoFormCancelBtn;
+        let doc = document, addEntryBtn, formCancelBtn, inputForm, searchForm, inputFormContainer, entriesContainer,
+            infoForm, infoFormContainer, infoFormCancelBtn, searchButton, plusPhoneContainer, infoPlusPhoneContainer, plusPhoneButton;
 
 
         let defOptions = {
@@ -41,13 +56,19 @@ let addressBook = function (_options) {
             formCancelBtn: '.cancel-button',
             infoFormCancelBtn: '.info-cancel-button',
             inputForm: '.input-form',
+            searchForm: 'form.search',
             inputFormContainer: '.input-form-container',
             infoForm: '.info-form',
             infoFormContainer: '.info-form-container',
             entriesContainer: '.entries-container',
             entryEditButton: '.edit-button',
             entryDeleteButton: '.delete-button',
-            entryDetailButton: '.detail-button'
+            entryDetailButton: '.detail-button',
+            searchButton: '.search-button',
+            plusPhoneButton: '.plus-button',
+            minusPhoneButton: '.minus-button',
+            plusPhoneContainer: '.plus-phone-container',
+            infoPlusPhoneContainer: '.info-plus-phone-container'
         };
 
         let editedRow = undefined;
@@ -98,7 +119,17 @@ let addressBook = function (_options) {
             }
         };
 
+        /*let phoneFieldFunctions = {
+            removePlusPhoneField: function () {
+                while (plusPhoneContainer.hasChildNodes()) {
+                    plusPhoneContainer.removeChild(plusPhoneContainer.firstChild);
+                }
+                plusPhoneContainer.classList.remove('mb-3');
+            }
+        };*/
+
         let eventHandlers = {
+
 
             formCancelBtn: function (ev) {
                 ev.preventDefault();
@@ -114,12 +145,12 @@ let addressBook = function (_options) {
                 formFunctions
                     .infoFormToggleDisplay()
                     .clearInfoForm();
+
                 return true;
             },
 
             addEntryBtn: function (ev) {
                 ev.preventDefault();
-
                 formFunctions.editFormToggleDisplay();
 
                 return true;
@@ -133,9 +164,10 @@ let addressBook = function (_options) {
                     if (!entry.isEmpty()) {
                         inputForm.dataset.isEmpty() && (idx = Book.push(entry) - 1);
                         inputForm.dataset.isEmpty() || (Book[idx = inputForm.dataset.index] = entry);
+                        (idx !== undefined) && (Book[idx]['idx'] = idx);
                     }
                     localStorage['addressBook'] = JSON.stringify(Book);
-                    idx < 0 || utilityFunctions.showEntry(entry, idx, editedRow);
+                    idx < 0 || utilityFunctions.showEntry(entry, editedRow);
                     idx < 0 || (Book[idx]['idx'] = idx);
 
                     formFunctions
@@ -145,6 +177,7 @@ let addressBook = function (_options) {
                     return true;
                 }
                 this.classList.add("was-validated");
+
 
                 return false;
             },
@@ -166,7 +199,6 @@ let addressBook = function (_options) {
             entryDetailButton: function (ev) {
                 ev.preventDefault();
                 let idx = this.offsetParent.parentNode.dataset.index;
-                //let item = utilityFunctions.getBooksItemByIdx(Book, idx);
                 let item = Book[idx];
                 Object.keys(item).forEach(function (key) {
                     infoForm.querySelector('[name=' + key + ']') && (infoForm.querySelector('[name=' + key + ']').value = item[key]);
@@ -189,13 +221,53 @@ let addressBook = function (_options) {
                 }
 
                 return false;
-            }
+            },
+
+            searchButton: function (ev) {
+                ev.preventDefault();
+                utilityFunctions.clearEntriesContainer();
+                utilityFunctions.showEntries();
+            },
+
+            /*addNewPhoneField: function (ev) {
+                ev.preventDefault();
+                let da = doc.getElementById('phone');
+                if( da.value === ""){
+                    return true;
+                } else {
+                    plusPhoneContainer.innerHTML = phoneFieldTemplate;
+                    infoPlusPhoneContainer.innerHTML = infoPhoneFieldTemplate;
+                    infoPlusPhoneContainer.classList.add('mb-3');
+                    plusPhoneContainer.classList.add('mb-3');
+                }
+            },*/
+
+        };
+
+        let Validation = {
+
+            patterns: {
+                tel: "\\D",
+                text: "\\W",
+            },
+
+            inputValidation: function (ev) {
+                let element = this;
+                let value = element.value;
+                let pattern = Validation.patterns[element.type];
+                if (!pattern) {
+                    return true;
+                }
+                let re = new RegExp(pattern);
+                element.value = value.replace(re, '');
+                inputForm.classList.add("was-validated");
+            },
 
         };
 
         let utilityFunctions = {
 
-            getBooksItemByIdx: function (Arr, idx) {
+            /*getBooksItemByIdx: function (Arr, idx) {
                 let res = undefined;
                 if (Arr) {
                     res = Arr.filter(function (item) {
@@ -205,7 +277,7 @@ let addressBook = function (_options) {
                 }
 
                 return res;
-            },
+            },*/
 
             FormToObject: function (form) {
                 let obj = {};
@@ -221,32 +293,42 @@ let addressBook = function (_options) {
                 addEntryBtn === undefined || addEntryBtn.addEventListener('click', eventHandlers.addEntryBtn);
                 formCancelBtn === undefined || formCancelBtn.addEventListener('click', eventHandlers.formCancelBtn);
                 infoFormCancelBtn === undefined || infoFormCancelBtn.addEventListener('click', eventHandlers.infoFormCancelBtn);
-                inputForm === undefined || inputForm.addEventListener('submit', eventHandlers.inputFormSubmit);
+                if (inputForm !== undefined) {
+                    inputForm.addEventListener('submit', eventHandlers.inputFormSubmit);
+                    let inputs = inputForm.querySelectorAll('input');
+                    inputs.forEach(function (input) {
+                        input.addEventListener('input', Validation.inputValidation);
+                    });
+                }
+                searchButton === undefined || searchButton.addEventListener('click', eventHandlers.searchButton);
+                searchForm === undefined || searchForm.addEventListener('submit', eventHandlers.searchButton);
+                /*plusPhoneButton === undefined || plusPhoneButton.addEventListener('click', eventHandlers.addNewPhoneField);*/
 
                 return utilityFunctions;
             },
 
             setEntryHandlers: function (item) {
-                item === undefined ||
-                item.querySelector(options.entryEditButton).addEventListener('click', eventHandlers.entryEditButton);
-                item.querySelector(options.entryDetailButton).addEventListener('click', eventHandlers.entryDetailButton);
-                item.querySelector(options.entryDeleteButton).addEventListener('click', eventHandlers.entryDeleteButton);
-                // item.querySelector().addEventListener('click', eventHandlers.quickAddBtn);
+                if (item !== undefined) {
+                    item.querySelector(options.entryEditButton).addEventListener('click', eventHandlers.entryEditButton);
+                    item.querySelector(options.entryDetailButton).addEventListener('click', eventHandlers.entryDetailButton);
+                    item.querySelector(options.entryDeleteButton).addEventListener('click', eventHandlers.entryDeleteButton);
+                    // item.querySelector().addEventListener('click', eventHandlers.quickAddBtn);
+                }
 
                 return utilityFunctions;
             },
 
-            showEntry: function (item, index, replaceElement = undefined) {
+            showEntry: function (item, replaceElement = undefined) {
                 let entry = doc.createElement('div');
                 entry.innerHTML = entryTemplate;
                 entry.classList.add('row', 'entry');
-                entry.dataset.index = index;
+                entry.dataset.index = item.idx;
                 Object.keys(item).forEach(function (key) {
                     entry.querySelector('.' + key) && (entry.querySelector('.' + key).innerText = item[key]);
                 });
 
                 (replaceElement === undefined) && entriesContainer.appendChild(entry);
-                replaceElement === undefined || entriesContainer.replaceChild(entry, replaceElement);
+                (replaceElement === undefined) || entriesContainer.replaceChild(entry, replaceElement);
 
                 return utilityFunctions.setEntryHandlers(entry);
             },
@@ -255,21 +337,28 @@ let addressBook = function (_options) {
                 let searchPhrase = doc.querySelector('input[name=search]').value;
                 let SearchElements = Book;
                 if (typeof searchPhrase === 'string' && searchPhrase.length > 0) {
+                    let reg = new RegExp(searchPhrase.toLowerCase());
                     SearchElements = Book.filter(
-                        function(item){
-                            // togo regexp conditions checking
-                            return true;
+                        function (item) {
+                            for (let key in item) {
+                                if (item.hasOwnProperty(key) &&
+                                    (typeof item[key] === "string") &&
+                                    reg.test(item[key].toLowerCase())
+                                ) {
+                                    return true;
+                                }
+                            }
+                            return false;
                         }
                     );
                 }
-
                 return SearchElements;
             },
 
             showEntries: function () {
                 let SearchBook = utilityFunctions.getSearchElements();
-                    SearchBook && SearchBook.length && SearchBook.forEach(function (item, index) {
-                    utilityFunctions.showEntry(item, index);
+                SearchBook && SearchBook.length && SearchBook.forEach(function (item) {
+                    utilityFunctions.showEntry(item);
                 });
 
                 return utilityFunctions;
@@ -288,13 +377,18 @@ let addressBook = function (_options) {
                 options = Object.assign({}, _options, defOptions);
 
                 addEntryBtn = doc.querySelector(options.addEntryBtn);
+                searchButton = doc.querySelector(options.searchButton);
                 formCancelBtn = doc.querySelector(options.formCancelBtn);
                 infoFormCancelBtn = doc.querySelector(options.infoFormCancelBtn);
                 inputFormContainer = doc.querySelector(options.inputFormContainer);
                 inputForm = doc.querySelector(options.inputForm);
+                searchForm = doc.querySelector(options.searchForm);
                 entriesContainer = doc.querySelector(options.entriesContainer);
+                plusPhoneContainer = doc.querySelector(options.plusPhoneContainer);
                 infoFormContainer = doc.querySelector(options.infoFormContainer);
                 infoForm = doc.querySelector(options.infoForm);
+                plusPhoneButton = doc.querySelector(options.plusPhoneButton);
+                infoPlusPhoneContainer = doc.querySelector(options.infoPlusPhoneContainer);
 
                 Book = JSON.parse(localStorage.getItem('addressBook')) || [];
 
